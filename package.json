@@ -1,5 +1,5 @@
 {
-  "name": "surge",
+  "name": "surge-geosite-enhance",
   "engines": {
     "node": ">=20.18.1"
   },
@@ -15,16 +15,23 @@
     "build:d1": "node scripts/build-d1-sql.mjs",
     "r2:sync": "node scripts/sync-r2.mjs",
     "kv:put:index": "wrangler kv key put geosite:index --binding=GEO_KV --path ./index.json",
-    "kv:put:geoip-index": "wrangler kv key put geoip:index --binding=GEO_KV --path ./geoip-index.json"
+    "kv:put:geoip-index": "wrangler kv key put geoip:index --binding=GEO_KV --path ./geoip-index.json",
+    "build:server": "esbuild server/index.ts --bundle --platform=node --format=esm --outfile=server.bundle.mjs --external:better-sqlite3",
+    "build:sqlite": "node scripts/build-sqlite.mjs",
+    "update:vps": "node scripts/update-vps-data.mjs"
   },
   "dependencies": {
-    "hono": "^4.11.1",
+    "@hono/node-server": "^2.1.1",
+    "better-sqlite3": "^13.0.3",
+    "hono": "^4.13.5",
     "jszip": "^3.10.1",
+    "protobufjs": "^7.6.6",
     "regjsparser": "^0.13.0"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20251221.0",
-    "protobufjs": "^7.5.4",
+    "@types/better-sqlite3": "^9.6.0",
+    "esbuild": "^0.28.2",
     "wrangler": "^4.45.3"
   }
 }

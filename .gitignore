@@ -34,3 +34,9 @@ AGENTS.md
 
 # Avoid Bun being auto-selected by CI (root only)
 /bun.lockb
+
+# local build output
+/server.bundle.mjs
+/dist/
+/index.json
+/geoip-index.json

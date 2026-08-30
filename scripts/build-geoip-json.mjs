@@ -14,10 +14,13 @@ import protobuf from "protobufjs";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const OUT_DIR = path.resolve(__dirname, "..", "dist");
+const BUILD_ROOT = process.env.BUILD_ROOT
+  ? path.resolve(process.env.BUILD_ROOT)
+  : path.resolve(__dirname, "..");
+const OUT_DIR = path.join(BUILD_ROOT, "dist");
 const OUT_JSON_DIR = path.join(OUT_DIR, "geoip-json");
-const INDEX_JSON_PATH = path.resolve(__dirname, "..", "geoip-index.json");
-const README_TABLE_PATH = path.resolve(__dirname, "..", "geoip_files.md");
+const INDEX_JSON_PATH = path.join(BUILD_ROOT, "geoip-index.json");
+const README_TABLE_PATH = path.join(BUILD_ROOT, "geoip_files.md");
 
 const GEOIP_DAT_URL =
   "https://cdn.jsdelivr.net/gh/Loyalsoldier/v2ray-rules-dat@release/geoip.dat";

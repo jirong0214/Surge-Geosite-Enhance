@@ -8,6 +8,8 @@
 
 👉 部署说明（包含 CI 与 Cloudflare 配置）：[docs/deploy.md](docs/deploy.md)
 
+🐳 VPS / Docker Compose 部署：[docs/deploy-vps.md](docs/deploy-vps.md)
+
 ## 功能与优势
 
 - 动态生成 Surge 规则集（基于 geosite.dat / geoip.dat）
@@ -114,6 +116,21 @@ npm run dev   # http://localhost:3000
 ```
 
 ## 部署（摘要）
+
+### VPS（Docker Compose）
+
+完整保留规则浏览、Surge/Egern 输出、SRS/MRS 下载，以及 GeoSite/GeoIP 反向搜索：
+
+```bash
+cp .env.docker.example .env
+# 修改 PUBLIC_BASE_URL 为域名或 VPS IP
+docker compose up -d --build
+```
+
+首次启动会下载上游数据并生成本地 SQLite/FTS5 和全部二进制规则集。默认访问
+`http://VPS-IP:8080`，详情见 [docs/deploy-vps.md](docs/deploy-vps.md)。
+
+### Cloudflare
 
 - Worker：`npm run deploy`（发布到 Cloudflare Workers；请先在 `wrangler.toml` 配置绑定并通过 `wrangler secret put` 设置密钥）
 - Pages（前端）：见 [docs/deploy.md](docs/deploy.md) 中 Pages 小节；可通过环境变量或 `_redirects` 指向你的 Worker API

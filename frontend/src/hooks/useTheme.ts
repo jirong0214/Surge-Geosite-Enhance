@@ -5,6 +5,15 @@ type ResolvedTheme = "light" | "dark"
 
 const storageKey = "theme-preference"
 
+const readStoredPreference = (): ThemePreference | null => {
+  if (typeof window === "undefined") return null
+  try {
+    return window.localStorage?.getItem(storageKey) as ThemePreference | null
+  } catch {
+    return null
+  }
+}
+
 const getSystemTheme = (): ResolvedTheme => {
   if (typeof window === "undefined") {
     return "light"
@@ -29,14 +38,14 @@ export const useTheme = () => {
     if (typeof window === "undefined") {
       return "system"
     }
-    const stored = window.localStorage.getItem(storageKey) as ThemePreference | null
+    const stored = readStoredPreference()
     return stored ?? "system"
   })
   const [resolved, setResolved] = useState<ResolvedTheme>(() => {
     if (typeof window === "undefined") {
       return "light"
     }
-    const stored = window.localStorage.getItem(storageKey) as ThemePreference | null
+    const stored = readStoredPreference()
     if (stored && stored !== "system") {
       return stored
     }
@@ -74,10 +83,14 @@ export const useTheme = () => {
   const updatePreference = (next: ThemePreference) => {
     setPreference(next)
     if (typeof window !== "undefined") {
-      if (next === "system") {
-        window.localStorage.removeItem(storageKey)
-      } else {
-        window.localStorage.setItem(storageKey, next)
+      try {
+        if (next === "system") {
+          window.localStorage?.removeItem(storageKey)
+        } else {
+          window.localStorage?.setItem(storageKey, next)
+        }
+      } catch {
+        // Theme still works for the current session when storage is unavailable.
       }
     }
   }

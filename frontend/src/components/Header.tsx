@@ -42,7 +42,7 @@ export const Header: React.FC = () => {
               </Button>
             </a>
             <a
-              href="https://github.com/Sleepstars/Surge-Geosite-Enhance"
+              href="https://github.com/jirong0214/Surge-Geosite-Enhance"
               target="_blank"
               rel="noopener noreferrer"
             >

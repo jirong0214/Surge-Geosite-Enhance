@@ -13,7 +13,10 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const execFileP = promisify(execFile);
 
-const DIST_DIR = path.resolve(__dirname, "..", "dist");
+const BUILD_ROOT = process.env.BUILD_ROOT
+  ? path.resolve(process.env.BUILD_ROOT)
+  : path.resolve(__dirname, "..");
+const DIST_DIR = path.join(BUILD_ROOT, "dist");
 const SRC_JSON_DIR = path.join(DIST_DIR, "geoip-json");
 const SRS_OUT_DIR = path.join(DIST_DIR, "srs-geoip");
 
