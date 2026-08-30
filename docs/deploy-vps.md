@@ -53,8 +53,8 @@ docker compose logs -f init
 
 ```bash
 # IMAGE_TAG 建议固定为具体版本，避免意外升级
-IMAGE_TAG=v1.0.0 docker compose -f docker-compose.release.yml pull
-IMAGE_TAG=v1.0.0 docker compose -f docker-compose.release.yml up -d
+IMAGE_TAG=1.0.0 docker compose -f docker-compose.release.yml pull
+IMAGE_TAG=1.0.0 docker compose -f docker-compose.release.yml up -d
 ```
 
 首次启动会完成完整数据构建，通常需要 3～15 分钟。`init` 正常退出后，`api`、
