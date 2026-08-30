@@ -46,19 +46,19 @@ KEEP_DATA_VERSIONS=2
 ```bash
 docker compose up -d --build
 docker compose ps
-docker compose logs -f init
+docker compose logs -f updater
 ```
 
 也可以直接使用 GitHub Release 对应的多架构镜像，无需在 VPS 上构建：
 
 ```bash
 # IMAGE_TAG 建议固定为具体版本，避免意外升级
-IMAGE_TAG=1.0.0 docker compose -f docker-compose.release.yml pull
-IMAGE_TAG=1.0.0 docker compose -f docker-compose.release.yml up -d
+IMAGE_TAG=1.0.1 docker compose -f docker-compose.release.yml pull
+IMAGE_TAG=1.0.1 docker compose -f docker-compose.release.yml up -d
 ```
 
-首次启动会完成完整数据构建，通常需要 3～15 分钟。`init` 正常退出后，`api`、
-`updater` 和 `web` 会启动。打开：
+首次启动时，`updater` 会先完成完整数据构建，通常需要 3～15 分钟。数据就绪并通过
+健康检查后，`api` 和 `web` 会自动启动。打开：
 
 ```text
 http://VPS-IP:8080
@@ -72,10 +72,14 @@ curl http://127.0.0.1:8080/healthz
 
 ## 容器结构
 
-- `init`：仅在数据卷为空时初始化，成功后退出。
 - `api`：Hono Node 服务，使用只读 SQLite/FTS5 和本地规则文件。
-- `updater`：默认按 `Asia/Shanghai` 时区每天 `06:30` 检查上游哈希；数据未变化时不重建。
+- `updater`：启动时确保数据已经初始化，之后默认按 `Asia/Shanghai` 时区每天 `06:30`
+  检查上游哈希；数据未变化时不重建。
 - `web`：Nginx 托管 React 前端、反向代理 API，并缓存 GET 响应。
+
+三个长期服务使用固定容器名 `surge-geosite-enhance-api`、
+`surge-geosite-enhance-updater` 和 `surge-geosite-enhance-web`，方便在服务器面板中识别。
+固定名称意味着同一服务不能通过 Compose 扩展为多个副本。
 
 数据默认保存在项目目录的 `./data`，通过 `DATA_DIR` 绑定到容器内的 `/data`。
 因此重建容器、更新镜像或执行 `docker compose down` 都不会删除数据，也便于直接备份。

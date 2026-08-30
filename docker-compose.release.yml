@@ -1,19 +1,29 @@
 services:
-  init:
+  updater:
     image: ghcr.io/jirong0214/surge-geosite-enhance-api:${IMAGE_TAG:-latest}
-    command: ["node", "scripts/update-vps-data.mjs", "--if-missing"]
-    environment: &data-environment
+    container_name: surge-geosite-enhance-updater
+    command: ["node", "scripts/update-vps-data.mjs", "--loop"]
+    environment:
       DATA_ROOT: /data
       BUILD_BINARY_RULESETS: ${BUILD_BINARY_RULESETS:-true}
       SRS_CONCURRENCY: ${SRS_CONCURRENCY:-2}
       MRS_CONCURRENCY: ${MRS_CONCURRENCY:-2}
       KEEP_DATA_VERSIONS: ${KEEP_DATA_VERSIONS:-2}
+      UPDATE_TIME: ${UPDATE_TIME:-06:30}
+      TZ: ${UPDATE_TIMEZONE:-Asia/Shanghai}
     volumes:
       - ${DATA_DIR:-./data}:/data
-    restart: "no"
+    healthcheck:
+      test: ["CMD", "node", "-e", "const f=require('node:fs');if(!f.existsSync('/data/current/metadata.json')||!f.existsSync('/data/current/data.sqlite'))process.exit(1)"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 20m
+    restart: unless-stopped
 
   api:
     image: ghcr.io/jirong0214/surge-geosite-enhance-api:${IMAGE_TAG:-latest}
+    container_name: surge-geosite-enhance-api
     environment:
       DATA_ROOT: /data
       PORT: 8787
@@ -22,8 +32,8 @@ services:
     volumes:
       - ${DATA_DIR:-./data}:/data
     depends_on:
-      init:
-        condition: service_completed_successfully
+      updater:
+        condition: service_healthy
     healthcheck:
       test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:8787/healthz').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
       interval: 10s
@@ -31,22 +41,9 @@ services:
       retries: 12
     restart: unless-stopped
 
-  updater:
-    image: ghcr.io/jirong0214/surge-geosite-enhance-api:${IMAGE_TAG:-latest}
-    command: ["node", "scripts/update-vps-data.mjs", "--loop"]
-    environment:
-      <<: *data-environment
-      UPDATE_TIME: ${UPDATE_TIME:-06:30}
-      TZ: ${UPDATE_TIMEZONE:-Asia/Shanghai}
-    volumes:
-      - ${DATA_DIR:-./data}:/data
-    depends_on:
-      init:
-        condition: service_completed_successfully
-    restart: unless-stopped
-
   web:
     image: ghcr.io/jirong0214/surge-geosite-enhance-web:${IMAGE_TAG:-latest}
+    container_name: surge-geosite-enhance-web
     ports:
       - "${HTTP_PORT:-8080}:80"
     depends_on:

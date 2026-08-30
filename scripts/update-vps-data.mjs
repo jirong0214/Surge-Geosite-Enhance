@@ -174,6 +174,7 @@ const updateOnce = async ({ onlyIfMissing = false } = {}) => {
 if (args.has("--loop")) {
   const schedule = parseUpdateTime();
   const timeZone = validateTimeZone();
+  await updateOnce({ onlyIfMissing: true });
   while (true) {
     const nextRun = nextScheduledRun(schedule.hour, schedule.minute);
     const waitMilliseconds = nextRun.getTime() - Date.now();
