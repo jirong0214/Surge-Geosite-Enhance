@@ -130,6 +130,10 @@ docker compose up -d --build
 首次启动会下载上游数据并生成本地 SQLite/FTS5 和全部二进制规则集。默认访问
 `http://VPS-IP:8080`，详情见 [docs/deploy-vps.md](docs/deploy-vps.md)。
 
+已发布的 amd64/arm64 镜像可配合 `docker-compose.release.yml` 使用，镜像位于
+`ghcr.io/jirong0214/surge-geosite-enhance-api` 和
+`ghcr.io/jirong0214/surge-geosite-enhance-web`。
+
 ### Cloudflare
 
 - Worker：`npm run deploy`（发布到 Cloudflare Workers；请先在 `wrangler.toml` 配置绑定并通过 `wrangler secret put` 设置密钥）

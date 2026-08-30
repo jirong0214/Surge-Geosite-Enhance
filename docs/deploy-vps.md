@@ -33,7 +33,7 @@ DATA_DIR=./data
 BUILD_BINARY_RULESETS=true
 SRS_CONCURRENCY=2
 MRS_CONCURRENCY=2
-UPDATE_TIME=03:30
+UPDATE_TIME=06:30
 UPDATE_TIMEZONE=Asia/Shanghai
 KEEP_DATA_VERSIONS=2
 ```
@@ -47,6 +47,14 @@ KEEP_DATA_VERSIONS=2
 docker compose up -d --build
 docker compose ps
 docker compose logs -f init
+```
+
+也可以直接使用 GitHub Release 对应的多架构镜像，无需在 VPS 上构建：
+
+```bash
+# IMAGE_TAG 建议固定为具体版本，避免意外升级
+IMAGE_TAG=v1.0.0 docker compose -f docker-compose.release.yml pull
+IMAGE_TAG=v1.0.0 docker compose -f docker-compose.release.yml up -d
 ```
 
 首次启动会完成完整数据构建，通常需要 3～15 分钟。`init` 正常退出后，`api`、
@@ -66,7 +74,7 @@ curl http://127.0.0.1:8080/healthz
 
 - `init`：仅在数据卷为空时初始化，成功后退出。
 - `api`：Hono Node 服务，使用只读 SQLite/FTS5 和本地规则文件。
-- `updater`：默认按 `Asia/Shanghai` 时区每天 `03:30` 检查上游哈希；数据未变化时不重建。
+- `updater`：默认按 `Asia/Shanghai` 时区每天 `06:30` 检查上游哈希；数据未变化时不重建。
 - `web`：Nginx 托管 React 前端、反向代理 API，并缓存 GET 响应。
 
 数据默认保存在项目目录的 `./data`，通过 `DATA_DIR` 绑定到容器内的 `/data`。
@@ -79,7 +87,7 @@ curl http://127.0.0.1:8080/healthz
 
 更新时间由 `.env` 中的 `UPDATE_TIME`（24 小时制 `HH:MM`）和 `UPDATE_TIMEZONE`
 （IANA 时区名称）控制。例如希望按 VPS 本地的 UTC 时间执行，可设置
-`UPDATE_TIME=03:30`、`UPDATE_TIMEZONE=UTC`。容器重启后仍会计算下一个固定时间点，
+`UPDATE_TIME=06:30`、`UPDATE_TIMEZONE=UTC`。容器重启后仍会计算下一个固定时间点，
 不会从重启时刻重新等待 24 小时。
 
 ## 更新与维护

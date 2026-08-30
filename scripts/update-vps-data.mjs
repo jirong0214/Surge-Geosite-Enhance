@@ -18,7 +18,7 @@ const sources = {
 const sha256 = (buffer) => crypto.createHash("sha256").update(buffer).digest("hex");
 
 const parseUpdateTime = () => {
-  const value = String(process.env.UPDATE_TIME || "03:30").trim();
+  const value = String(process.env.UPDATE_TIME || "06:30").trim();
   const match = /^(?:[01]\d|2[0-3]):[0-5]\d$/.exec(value);
   if (!match) throw new Error(`Invalid UPDATE_TIME: ${value}. Expected HH:MM (00:00-23:59).`);
   const [hour, minute] = value.split(":").map(Number);

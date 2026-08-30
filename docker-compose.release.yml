@@ -1,8 +1,6 @@
 services:
   init:
-    build:
-      context: .
-    image: surge-geosite-enhance-api:local
+    image: ghcr.io/jirong0214/surge-geosite-enhance-api:${IMAGE_TAG:-latest}
     command: ["node", "scripts/update-vps-data.mjs", "--if-missing"]
     environment: &data-environment
       DATA_ROOT: /data
@@ -15,7 +13,7 @@ services:
     restart: "no"
 
   api:
-    image: surge-geosite-enhance-api:local
+    image: ghcr.io/jirong0214/surge-geosite-enhance-api:${IMAGE_TAG:-latest}
     environment:
       DATA_ROOT: /data
       PORT: 8787
@@ -34,7 +32,7 @@ services:
     restart: unless-stopped
 
   updater:
-    image: surge-geosite-enhance-api:local
+    image: ghcr.io/jirong0214/surge-geosite-enhance-api:${IMAGE_TAG:-latest}
     command: ["node", "scripts/update-vps-data.mjs", "--loop"]
     environment:
       <<: *data-environment
@@ -48,12 +46,7 @@ services:
     restart: unless-stopped
 
   web:
-    build:
-      context: .
-      dockerfile: frontend/Dockerfile
-      args:
-        VITE_API_BASE: ""
-    image: surge-geosite-enhance-web:local
+    image: ghcr.io/jirong0214/surge-geosite-enhance-web:${IMAGE_TAG:-latest}
     ports:
       - "${HTTP_PORT:-8080}:80"
     depends_on:

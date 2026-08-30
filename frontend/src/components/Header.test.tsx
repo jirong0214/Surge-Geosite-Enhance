@@ -10,10 +10,10 @@ describe('Header', () => {
     expect(screen.getByText('直观浏览与域名搜索 GeoSite / GeoIP 规则')).toBeInTheDocument()
   })
 
-  it('renders navigation links', () => {
+  it('renders GitHub without the blog link', () => {
     render(<Header />)
 
-    expect(screen.getByText('博客文章')).toBeInTheDocument()
+    expect(screen.queryByText('博客文章')).not.toBeInTheDocument()
     expect(screen.getByText('GitHub')).toBeInTheDocument()
   })
 })
