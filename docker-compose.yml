@@ -38,7 +38,8 @@ services:
     command: ["node", "scripts/update-vps-data.mjs", "--loop"]
     environment:
       <<: *data-environment
-      UPDATE_INTERVAL_SECONDS: ${UPDATE_INTERVAL_SECONDS:-86400}
+      UPDATE_TIME: ${UPDATE_TIME:-03:30}
+      TZ: ${UPDATE_TIMEZONE:-Asia/Shanghai}
     volumes:
       - ${DATA_DIR:-./data}:/data
     depends_on:

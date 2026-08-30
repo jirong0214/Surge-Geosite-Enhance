@@ -6,7 +6,6 @@ import { spawn } from "node:child_process";
 const dataRoot = path.resolve(process.env.DATA_ROOT || "/data");
 const versionsDir = path.join(dataRoot, "versions");
 const currentLink = path.join(dataRoot, "current");
-const intervalSeconds = Math.max(3600, Number(process.env.UPDATE_INTERVAL_SECONDS || 86400));
 const keepVersions = Math.max(1, Number(process.env.KEEP_DATA_VERSIONS || 2));
 const buildBinaries = !["0", "false", "no"].includes(String(process.env.BUILD_BINARY_RULESETS || "true").toLowerCase());
 const args = new Set(process.argv.slice(2));
@@ -17,6 +16,45 @@ const sources = {
 };
 
 const sha256 = (buffer) => crypto.createHash("sha256").update(buffer).digest("hex");
+
+const parseUpdateTime = () => {
+  const value = String(process.env.UPDATE_TIME || "03:30").trim();
+  const match = /^(?:[01]\d|2[0-3]):[0-5]\d$/.exec(value);
+  if (!match) throw new Error(`Invalid UPDATE_TIME: ${value}. Expected HH:MM (00:00-23:59).`);
+  const [hour, minute] = value.split(":").map(Number);
+  return { value, hour, minute };
+};
+
+const validateTimeZone = () => {
+  const value = process.env.TZ || "UTC";
+  try {
+    new Intl.DateTimeFormat("en-US", { timeZone: value }).format();
+  } catch {
+    throw new Error(`Invalid TZ time zone: ${value}.`);
+  }
+  return value;
+};
+
+const nextScheduledRun = (hour, minute, now = new Date()) => {
+  const next = new Date(now);
+  next.setHours(hour, minute, 0, 0);
+  if (next <= now) next.setDate(next.getDate() + 1);
+  return next;
+};
+
+const formatLocalTime = (date, timeZone) => {
+  const formatted = new Intl.DateTimeFormat("sv-SE", {
+    timeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hourCycle: "h23",
+  }).format(date);
+  return `${formatted} (${timeZone})`;
+};
 
 const run = (command, commandArgs, env = {}) => new Promise((resolve, reject) => {
   const child = spawn(command, commandArgs, {
@@ -134,9 +172,13 @@ const updateOnce = async ({ onlyIfMissing = false } = {}) => {
 };
 
 if (args.has("--loop")) {
-  console.log(`Updater loop enabled; next check in ${intervalSeconds} seconds.`);
+  const schedule = parseUpdateTime();
+  const timeZone = validateTimeZone();
   while (true) {
-    await new Promise((resolve) => setTimeout(resolve, intervalSeconds * 1000));
+    const nextRun = nextScheduledRun(schedule.hour, schedule.minute);
+    const waitMilliseconds = nextRun.getTime() - Date.now();
+    console.log(`Updater schedule enabled for ${schedule.value}; next check at ${formatLocalTime(nextRun, timeZone)}.`);
+    await new Promise((resolve) => setTimeout(resolve, waitMilliseconds));
     try {
       await updateOnce();
     } catch (error) {

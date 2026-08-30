@@ -33,7 +33,8 @@ DATA_DIR=./data
 BUILD_BINARY_RULESETS=true
 SRS_CONCURRENCY=2
 MRS_CONCURRENCY=2
-UPDATE_INTERVAL_SECONDS=86400
+UPDATE_TIME=03:30
+UPDATE_TIMEZONE=Asia/Shanghai
 KEEP_DATA_VERSIONS=2
 ```
 
@@ -65,7 +66,7 @@ curl http://127.0.0.1:8080/healthz
 
 - `init`：仅在数据卷为空时初始化，成功后退出。
 - `api`：Hono Node 服务，使用只读 SQLite/FTS5 和本地规则文件。
-- `updater`：默认每 24 小时检查一次上游哈希；数据未变化时不重建。
+- `updater`：默认按 `Asia/Shanghai` 时区每天 `03:30` 检查上游哈希；数据未变化时不重建。
 - `web`：Nginx 托管 React 前端、反向代理 API，并缓存 GET 响应。
 
 数据默认保存在项目目录的 `./data`，通过 `DATA_DIR` 绑定到容器内的 `/data`。
@@ -75,6 +76,11 @@ curl http://127.0.0.1:8080/healthz
 
 更新器先在新版本目录构建并验证全部产物，完成后原子切换 `current` 软链接；正在
 提供服务的版本不会被半成品覆盖。
+
+更新时间由 `.env` 中的 `UPDATE_TIME`（24 小时制 `HH:MM`）和 `UPDATE_TIMEZONE`
+（IANA 时区名称）控制。例如希望按 VPS 本地的 UTC 时间执行，可设置
+`UPDATE_TIME=03:30`、`UPDATE_TIMEZONE=UTC`。容器重启后仍会计算下一个固定时间点，
+不会从重启时刻重新等待 24 小时。
 
 ## 更新与维护
 
