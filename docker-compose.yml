@@ -11,7 +11,7 @@ services:
       MRS_CONCURRENCY: ${MRS_CONCURRENCY:-2}
       KEEP_DATA_VERSIONS: ${KEEP_DATA_VERSIONS:-2}
     volumes:
-      - geosite-data:/data
+      - ${DATA_DIR:-./data}:/data
     restart: "no"
 
   api:
@@ -22,7 +22,7 @@ services:
       PUBLIC_PORT: ${HTTP_PORT:-8080}
       PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:-http://localhost:8080}
     volumes:
-      - geosite-data:/data
+      - ${DATA_DIR:-./data}:/data
     depends_on:
       init:
         condition: service_completed_successfully
@@ -40,7 +40,7 @@ services:
       <<: *data-environment
       UPDATE_INTERVAL_SECONDS: ${UPDATE_INTERVAL_SECONDS:-86400}
     volumes:
-      - geosite-data:/data
+      - ${DATA_DIR:-./data}:/data
     depends_on:
       init:
         condition: service_completed_successfully
@@ -59,6 +59,3 @@ services:
       api:
         condition: service_healthy
     restart: unless-stopped
-
-volumes:
-  geosite-data:

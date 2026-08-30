@@ -123,7 +123,7 @@ npm run dev   # http://localhost:3000
 
 ```bash
 cp .env.docker.example .env
-# 修改 PUBLIC_BASE_URL 为域名或 VPS IP
+# 修改 PUBLIC_BASE_URL 为域名或 VPS IP；数据默认持久化到 ./data
 docker compose up -d --build
 ```
 

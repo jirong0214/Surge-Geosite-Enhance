@@ -29,6 +29,7 @@ cp .env.docker.example .env
 ```dotenv
 PUBLIC_BASE_URL=http://192.168.1.10:8080
 HTTP_PORT=8080
+DATA_DIR=./data
 BUILD_BINARY_RULESETS=true
 SRS_CONCURRENCY=2
 MRS_CONCURRENCY=2
@@ -67,8 +68,13 @@ curl http://127.0.0.1:8080/healthz
 - `updater`：默认每 24 小时检查一次上游哈希；数据未变化时不重建。
 - `web`：Nginx 托管 React 前端、反向代理 API，并缓存 GET 响应。
 
-数据保存在 Compose 命名卷 `geosite-data`。更新器先在新版本目录构建并验证全部
-产物，完成后原子切换 `current` 软链接；正在提供服务的版本不会被半成品覆盖。
+数据默认保存在项目目录的 `./data`，通过 `DATA_DIR` 绑定到容器内的 `/data`。
+因此重建容器、更新镜像或执行 `docker compose down` 都不会删除数据，也便于直接备份。
+需要放到其他磁盘时，可把 `DATA_DIR` 改成绝对路径，例如 `/srv/geosite-data`；请确保
+该目录存在且 Docker 有读写权限。
+
+更新器先在新版本目录构建并验证全部产物，完成后原子切换 `current` 软链接；正在
+提供服务的版本不会被半成品覆盖。
 
 ## 更新与维护
 
@@ -98,7 +104,8 @@ docker stats
 docker compose down
 ```
 
-不要使用 `docker compose down -v`，除非确定要删除 SQLite、JSON、SRS、MRS 和历史版本。
+数据是宿主机目录，`docker compose down -v` 也不会删除它。需要清理时，请先停止服务，
+再手动删除 `DATA_DIR` 指向目录中的内容。
 
 ## HTTPS 反向代理
 
